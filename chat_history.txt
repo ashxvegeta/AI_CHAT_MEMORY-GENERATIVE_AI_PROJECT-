@@ -1,0 +1,8 @@
+Human: hello
+AI: Hello! How can I assist you today?
+Human: which one is bigger 1 or 2
+AI: 2 is bigger than 1.
+Human: now multiple the bigger one with 10
+AI: Multiplying 2 by 10 gives you 20.
+Human: now multiple it with 30
+AI: Multiplying 20 by 30 gives you 600.
