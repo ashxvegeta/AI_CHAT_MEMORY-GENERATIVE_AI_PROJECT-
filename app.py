@@ -1,68 +1,66 @@
-# 1. Import all required modules
-# to read environment variables
+from fastapi import FastAPI
+from pydantic import BaseModel
 import os
-# loads API key from .env
 from dotenv import load_dotenv
-# actual AI model class
+
 from langchain_openai import ChatOpenAI
-# required for creating chat messages
-from langchain_core.messages import HumanMessage, AIMessage ,SystemMessage
-# read memory from file and save new messages
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from utils.history_manager import load_chat_history, save_message
 
-# ✅ 2. Load the .env file
 load_dotenv()
 
-# ✅ 3. Check if API key exists
+app = FastAPI()
+
+# ✅ Load API Key
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    print("Please set your OPENAI_API_KEY in a .env file")
-    raise SystemExit(1) # Stop here if API key is missing
 
-# ✅ 4. Select which OpenAI model to use
-MODEL_NAME = "gpt-4o-mini" 
-model = ChatOpenAI(model_name=MODEL_NAME,temperature=0)
+# ✅ Load Model
+model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
-# ✅ 5. Load chat memory from file
-chat_history = load_chat_history()  #This function reads chat_history.txt and returns a list like:
+# ✅ Load previous chat memory
+chat_history = load_chat_history()
 
-# ✅ 6. Create the system message
-# This message ALWAYS stays at the top.
-# It defines how the AI should behave.
-system_message = SystemMessage(content="You are a helpful AI assistant.")
+# ✅ System message (bot behavior)
+system_msg = SystemMessage(content="You are a helpful AI assistant.")
+
+# ✅ Request body model
+class ChatRequest(BaseModel):
+    message: str
 
 
-# ✅ 7. Start the chatbot loop
-print("=== AI Chatbot (type 'exit' to quit) ===")
+# ✅ Testing route
+@app.get("/")
+def home():
+    return {"message": "AI Chatbot with Memory is Running!"}
 
 
-while True:
-    user_input = input("You: ").strip()
-    if not user_input:
-        continue
-    # ✅ 8. If user types "exit", quit
-    if user_input.lower() == "exit":
-        print("Exiting chat. Goodbye!")
-        break
+# ✅ Main Chat API
+@app.post("/chat")
+@app.post("/chat")
+def chat(request: ChatRequest):
+    user_input = request.message
 
-    # ✅ 9. Build the message list to send to model
-     # Build messages: system + existing history + new user message
-    messages = [system_message] + chat_history + [HumanMessage(content=user_input)]
+    # ✅ Reload memory fresh from file every request
+    chat_history = load_chat_history()
 
-    # ✅ 10. Save the new HUMAN message
-    # Save user message to file & local list
-    #  Writes into chat_history.txt
-    # Adds the message to in-memory list
-    save_message("human",user_input)
     chat_history.append(HumanMessage(content=user_input))
+    save_message("human", user_input)
 
-    # ✅ 11. Call the AI model
-    #invoke the model to get AI response
+    messages = [system_msg] + chat_history
+
     response = model.invoke(messages)
-    reply_text  = response.content.strip()
+    reply_text = response.content.strip()
 
-    # ✅ 12. Print & save AI’s response
-    # Print and save AI response
-    print("AI:" , reply_text)
-    save_message("ai",reply_text)
     chat_history.append(AIMessage(content=reply_text))
+    save_message("ai", reply_text)
+
+    return {
+        "reply": reply_text,
+        "history": [
+            {"role": "human", "content": m.content}
+            if isinstance(m, HumanMessage)
+            else {"role": "ai", "content": m.content}
+            for m in chat_history
+        ]
+    }
+
