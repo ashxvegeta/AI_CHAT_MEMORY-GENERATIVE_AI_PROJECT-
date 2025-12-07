@@ -1,3 +1,5 @@
+
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
@@ -11,6 +13,14 @@ load_dotenv()
 
 # ✅ Create FastAPI app
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ✅ Load API Key
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
