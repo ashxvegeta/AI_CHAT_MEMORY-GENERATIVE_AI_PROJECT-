@@ -1,4 +1,0 @@
-Human: hi
-AI: Hello! How can I assist you today?
-Human: which is bigger 10 or 20 ?
-AI: 20 is bigger than 10.
