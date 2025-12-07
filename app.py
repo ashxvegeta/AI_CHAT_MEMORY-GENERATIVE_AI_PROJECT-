@@ -35,7 +35,7 @@ def home():
 
 
 # ✅ Main Chat API
-@app.post("/chat")
+
 @app.post("/chat")
 def chat(request: ChatRequest):
     user_input = request.message
@@ -63,4 +63,3 @@ def chat(request: ChatRequest):
             for m in chat_history
         ]
     }
-

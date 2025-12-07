@@ -1,6 +1,4 @@
-Human: hy
+Human: hi
 AI: Hello! How can I assist you today?
-Human: which is bigger 10 or 12?
-AI: 12 is bigger than 10.
-Human: now multiply the big one with 10
-AI: Multiplying 12 by 10 gives you 120.
+Human: which is bigger 10 or 20 ?
+AI: 20 is bigger than 10.
